@@ -2,8 +2,8 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import javax.imageio.stream.MemoryCacheImageInputStream;
 import javax.xml.catalog.Catalog;
-
 class Filme {
     private String Nome;
     private String TituloOriginal;
@@ -229,23 +229,112 @@ class Filme {
             }
         }
         this.TituloOriginal=tituloO;
+        String sit="";
         flag=false;
         while (!flag && Arq.hasNext()) {
             String linha = Arq.readLine();
             int pos=0;
-            if (linha.contains("<p class=" + "\"" + "wrap" + "\"")) {
+            if (linha.contains("<strong><bdi>Situa")) {
                 flag = true;
                 for (int i = 0; i < linha.length(); i++) {
-                    if (linha.charAt(i) == 'l') {
-                        pos=i+11;
+                    if (linha.charAt(i) == '<'&&linha.charAt(i-1)=='o') {
+                        pos=i+16;
                     }
                 }
-                while(linha.charAt(pos)!='<'){
-                    tituloO+=linha.charAt(pos);
+                while(pos<linha.length()){
+                    sit+=linha.charAt(pos);
                     pos++;
                 }
             }
         }
+        this.Situacao=sit;
+        flag=false;
+        String io="";
+        while (!flag && Arq.hasNext()) {
+            String linha = Arq.readLine();
+            int pos=0;
+            if (linha.contains("Idioma original")) {
+                flag = true;
+                for (int i = 0; i < linha.length(); i++) {
+                    if (linha.charAt(i) == '<'&&linha.charAt(i-1)=='l') {
+                        pos=i+16;
+                    }
+                }
+                while(linha.charAt(pos)!='<'){
+                    io+=linha.charAt(pos);
+                    pos++;
+                }
+            }
+        }
+        this.IdiomaOriginal=io;
+        flag=false;
+        float orc=0;
+        while (!flag && Arq.hasNext()) {
+            String linha = Arq.readLine();
+            String dinheiro="";
+            int pos=0;
+            if (linha.contains("<p><strong><bdi>Or")) {
+                flag = true;
+                for (int i = 0; i < linha.length(); i++) {
+                    if (linha.charAt(i) == '<'&&linha.charAt(i-1)=='o') {
+                        pos=i+17;
+                    }
+                }
+                while(linha.charAt(pos)!='<'){
+                    if(linha.charAt(pos)==','){
+                        pos++;
+                    }
+                    else{
+                        dinheiro+=linha.charAt(pos);
+                        pos++;
+                    }
+                }
+                orc=Float.parseFloat(dinheiro);
+            }
+        }
+        this.Orcamento=orc;
+        flag=false;
+        String[] PC = new String[100];
+        while (!flag && Arq.hasNext()) {
+            String linha = Arq.readLine();
+            String dinheiro="";
+            int pos=0;
+            int contador=0;
+            if (linha.contains("Palavras-chave")) {
+                Arq.readLine();
+                Arq.readLine();
+                Arq.readLine();
+                flag = true;
+                String aux="";
+                while(!aux.contains("</ul>")){
+                    String aux2="";
+                    aux=Arq.readLine();
+                    if(aux.contains("<li>")){
+                        for(int i=0;i<aux.length();i++){
+                            if(aux.charAt(i)=='>'&&aux.charAt(i-1)=='"'){
+                                pos=i+1;
+                            }
+                        }
+                        while(aux.charAt(pos)!='<'){
+                            aux2+=aux.charAt(pos);
+                            pos++;
+                        }
+                        MyIO.println(aux2);
+                        PC[contador]=aux2;
+                        contador++;
+                    }
+                }
+                String[] Palavras = new String[contador];
+                for(int i=0;i<contador;i++){
+                    Palavras[i]=PC[i];
+                }
+                this.PalavrasChave=Palavras;
+            }
+        }
+        
+        
+        flag=false;
+        Arq.close();
     }
 
     public void Imprimir() {
@@ -256,13 +345,24 @@ class Filme {
 }
 
 class TP02Q01 {
+
     public static boolean isFim(String s) {
         return (s.length() == 3 && s.charAt(0) == 'F' && s.charAt(1) == 'I' && s.charAt(2) == 'M');
     }
 
     public static void main(String[] args) {
-        String arquivo = "filmes/007 - Sem Tempo para Morrer.html";
-        Filme f = new Filme(arquivo);
-        f.Imprimir();
+        String[] entrada = new String[1000];
+        int numEntrada = 0;
+        do {
+            entrada[numEntrada] = MyIO.readLine();
+           } while (isFim(entrada[numEntrada++]) == false);
+         numEntrada--;   //Desconsiderar ultima linha contendo a palavra FIM
+        for(int i = 0; i < numEntrada; i++){
+            String arquivo = "tmp/filmes/"+entrada[i];
+            MyIO.println(arquivo);
+            Filme f = new Filme(arquivo);
+            f.Imprimir();
+        }
+        
     }
 }
