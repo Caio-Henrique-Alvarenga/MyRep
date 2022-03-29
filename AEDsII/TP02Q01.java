@@ -46,8 +46,10 @@ class Filme {
             if(linha.contains("<span class="+"\""+"release"+"\"")){
                 flag=true;
                 aux=Arq.readLine();
+                int contador=0;
                 for(int j=0;j<aux.length();j++){
-                    if(aux.charAt(j)!=' '){
+                    if(aux.charAt(j)!=' '&&contador<10){
+                        contador++;
                         data+=aux.charAt(j);
                     }
                 }
@@ -57,6 +59,7 @@ class Filme {
             this.DataDeLancamento=sdp.parse(data);
         }catch(Exception e){
         }
+        MyIO.println("Data: " + data);
     }
 
     Filme(String arquivo) {
