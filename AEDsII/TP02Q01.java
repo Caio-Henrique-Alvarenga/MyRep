@@ -14,59 +14,12 @@ class Filme {
     private String Situacao;
     private float Orcamento;
     private String[] PalavrasChave;
-
-    public void ler(String arquivo) {
-        int inicio=0;
-        String nome = "";
-        Arq.openRead(arquivo);
-        for (int i=0;i<3;i++){
-            Arq.readLine();
-        }
-        String format =  Arq.readLine();
-        for(int i=0;i<format.length();i++){
-            if(format.charAt(i)=='>'){
-                inicio=i+1;
-                i = format.length();
-            }
-        }
-        while(inicio < format.length()){
-            nome+=format.charAt(inicio);
-            if(format.charAt(inicio+1) == ' ' && format.charAt(inicio+2) == '(') {
-                inicio = format.length();
-            }
-            inicio++;
-        }
-        this.Nome = nome;
-        String  data = "";
-        SimpleDateFormat sdp = new SimpleDateFormat("dd/MM/yyyy");
-        boolean flag=false;
-        while(!flag&&Arq.hasNext()){
-            String linha=Arq.readLine();
-            String aux;
-            if(linha.contains("<span class="+"\""+"release"+"\"")){
-                flag=true;
-                aux=Arq.readLine();
-                int contador=0;
-                for(int j=0;j<aux.length();j++){
-                    if(aux.charAt(j)!=' '&&contador<10){
-                        contador++;
-                        data+=aux.charAt(j);
-                    }
-                }
-            }
-        }
-        try{
-            this.DataDeLancamento=sdp.parse(data);
-        }catch(Exception e){
-        }
-        MyIO.println("Data: " + data);
-    }
-
+    SimpleDateFormat sdp = new SimpleDateFormat("dd/MM/yyyy");
     Filme(String arquivo) {
         this.ler(arquivo);
     }
 
-    public Filme(){
+    public Filme() {
 
     }
 
@@ -161,8 +114,142 @@ class Filme {
         return f;
     }
 
+    public void ler(String arquivo) {
+        int inicio = 0;
+        String nome = "";
+        Arq.openRead(arquivo);
+        for (int i = 0; i < 3; i++) {
+            Arq.readLine();
+        }
+        String format = Arq.readLine();
+        for (int i = 0; i < format.length(); i++) {
+            if (format.charAt(i) == '>') {
+                inicio = i + 1;
+                i = format.length();
+            }
+        }
+        while (inicio < format.length()) {
+            nome += format.charAt(inicio);
+            if (format.charAt(inicio + 1) == ' ' && format.charAt(inicio + 2) == '(') {
+                inicio = format.length();
+            }
+            inicio++;
+        }
+        this.Nome = nome;
+        String data = "";
+        boolean flag = false;
+        while (!flag && Arq.hasNext()) {
+            String linha = Arq.readLine();
+            String aux;
+            if (linha.contains("<span class=" + "\"" + "release" + "\"")) {
+                flag = true;
+                aux = Arq.readLine();
+                int contador = 0;
+                for (int i = 0; i < aux.length(); i++) {
+                    if (aux.charAt(i) != ' ' && contador < 10) {
+                        contador++;
+                        data += aux.charAt(i);
+                    }
+                }
+            }
+        }
+        try {
+            this.DataDeLancamento = sdp.parse(data);
+        } catch (Exception e) {
+        }
+        flag=false;
+        String genres="";
+        while (!flag && Arq.hasNext()) {
+            String linha = Arq.readLine();
+            String aux;
+            int pos=0;
+            if (linha.contains("<span class=" + "\"" + "genres" + "\"")) {
+                Arq.readLine();
+                flag = true;
+                aux = Arq.readLine();
+                for (int i = 0; i < aux.length(); i++) {
+                    if (aux.charAt(i) == '>'&&aux.charAt(i-1)!='a') {
+                        pos=i+1;
+                        while(aux.charAt(pos)!='<'){
+                            genres+=aux.charAt(pos);
+                            pos++;
+                        }
+                        genres+=',';
+                    }
+                }
+            }
+        }
+        flag=false;
+        String generos="";
+        for(int tam=0;tam<genres.length()-1;tam++){
+            generos+=genres.charAt(tam);
+        }
+        this.Genero=generos;
+        int runtime=0;
+        while (!flag && Arq.hasNext()) {
+            String linha = Arq.readLine();
+            String aux;
+            if (linha.contains("<span class=" + "\"" + "runtime" + "\"")) {
+                Arq.readLine();
+                String horas="";
+                String minutos="";
+                flag = true;
+                aux = Arq.readLine();
+                for (int i = 0; i < aux.length(); i++) {
+                    if (aux.charAt(i) == 'h') {
+                        horas+=aux.charAt(i-1);
+                        runtime+=Integer.parseInt(horas);
+                        runtime*=60;
+                    }
+                    if(aux.charAt(i) == 'm'){
+                        minutos+=aux.charAt(i-2);
+                        minutos+=aux.charAt(i-1);
+                        runtime+=Integer.parseInt(minutos);
+                    }
+                }
+            }
+        }
+        flag=false;
+        this.Duracao=runtime;
+        String tituloO="";
+        while (!flag && Arq.hasNext()) {
+            String linha = Arq.readLine();
+            int pos=0;
+            if (linha.contains("<p class=" + "\"" + "wrap" + "\"")) {
+                flag = true;
+                for (int i = 0; i < linha.length(); i++) {
+                    if (linha.charAt(i) == 'l') {
+                        pos=i+11;
+                    }
+                }
+                while(linha.charAt(pos)!='<'){
+                    tituloO+=linha.charAt(pos);
+                    pos++;
+                }
+            }
+        }
+        this.TituloOriginal=tituloO;
+        flag=false;
+        while (!flag && Arq.hasNext()) {
+            String linha = Arq.readLine();
+            int pos=0;
+            if (linha.contains("<p class=" + "\"" + "wrap" + "\"")) {
+                flag = true;
+                for (int i = 0; i < linha.length(); i++) {
+                    if (linha.charAt(i) == 'l') {
+                        pos=i+11;
+                    }
+                }
+                while(linha.charAt(pos)!='<'){
+                    tituloO+=linha.charAt(pos);
+                    pos++;
+                }
+            }
+        }
+    }
+
     public void Imprimir() {
-        System.out.println(this.Nome + " " + this.TituloOriginal + " " + this.DataDeLancamento + " " + this.Duracao
+        System.out.println(this.Nome + " " + this.TituloOriginal + " " + sdp.format(this.DataDeLancamento) + " " + this.Duracao
                 + " " + this.Genero + " " + this.IdiomaOriginal + " " + this.Situacao + " " + this.Orcamento + " "
                 + Arrays.toString(this.PalavrasChave));
     }
@@ -174,7 +261,7 @@ class TP02Q01 {
     }
 
     public static void main(String[] args) {
-        String arquivo = "filmes/007_ Sem Tempo para Morrer.html";
+        String arquivo = "filmes/007 - Sem Tempo para Morrer.html";
         Filme f = new Filme(arquivo);
         f.Imprimir();
     }
