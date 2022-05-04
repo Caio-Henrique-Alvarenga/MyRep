@@ -31,8 +31,7 @@ public class UsuarioService {
 
 	
 	public Object get(Request request, Response response) {
-		String[] parametros = request.params(":id").split("-");		
-		int id = Integer.parseInt(parametros[0]);
+		int id = Integer.parseInt(request.params(":id"));
 		Usuario usuario = (Usuario) usuarioDAO.get(id);
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		String json = gson.toJson(usuario);
